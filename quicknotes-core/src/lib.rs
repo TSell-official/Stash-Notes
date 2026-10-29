@@ -321,19 +321,28 @@ pub fn search_notes(conn: &Connection, query: &str, limit: i64) -> anyhow::Resul
     if trimmed.is_empty() {
         return Ok(vec![]);
     }
-    // Sanitize: strip FTS5 operator characters that could cause syntax errors,
-    // quote remaining terms, join with implicit AND.
+    // Sanitize: strip punctuation that could cause FTS5 syntax errors, then
+    // prefix each term so "fts" matches whole tokens like "fts5" (the unicode61
+    // tokenizer does not split on digits). Terms are OR-joined for recall and
+    // ranked by BM25.
     let safe_query: String = trimmed
         .split_whitespace()
         .map(|w| {
             let cleaned: String = w
                 .chars()
-                .filter(|c| c.is_alphanumeric() || *c == '_' || *c == '-')
+                .filter(|c| c.is_alphanumeric() || *c == '_')
                 .collect();
-            format!("\"{cleaned}\"")
+            if cleaned.is_empty() {
+                None
+            } else {
+                Some(format!("\"{cleaned}\"*"))
+            }
         })
         .collect::<Vec<_>>()
-        .join(" AND ");
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>()
+        .join(" OR ");
     if safe_query.is_empty() {
         return Ok(vec![]);
     }
