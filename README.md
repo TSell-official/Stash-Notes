@@ -14,7 +14,7 @@ all sharing one SQLite + FTS5 database.**
 ## Why this exists
 
 It started as a single-file HTML sticky-note board with drag-and-drop notes, colors,
-and Web-Speech dictation. Cute — but the notes lived in `localStorage`, invisible to
+and Web-Speech dictation. It was a nice prototype, but the notes lived in localStorage, invisible to
 everything else on your machine.
 
 QuickNotes keeps the exact same board UX and rebuilds the persistence layer on a
@@ -221,4 +221,4 @@ crate is deliberately dependency-light so patches stay easy.
 
 ## License
 
-MIT © [your name] — see [LICENSE](LICENSE).
+MIT © T-Sell Official — see [LICENSE](LICENSE).
