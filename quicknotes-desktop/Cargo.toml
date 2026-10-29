@@ -1,0 +1,31 @@
+[package]
+name = "quicknotes-desktop"
+description = "QuickNotes desktop app — a Tauri 2 shell around the shared SQLite + FTS5 core with global shortcut capture"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[lib]
+name = "quicknotes_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+quicknotes-core = { path = "../quicknotes-core", version = "0.1.0" }
+serde.workspace = true
+serde_json.workspace = true
+rusqlite.workspace = true
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-global-shortcut = "2"
+
+[dependencies.tauri]
+version = "2"
+features = ["tray-icon"]
+
+[dev-dependencies]
+tauri = { version = "2", features = ["test"] }

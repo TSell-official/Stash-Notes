@@ -1,0 +1,23 @@
+# Rust / Cargo
+/target/
+**/*.rs.bk
+
+# Node / frontend
+node_modules/
+frontend/dist/
+
+# Tauri generated schemas
+quicknotes-desktop/gen/schemas/
+
+# Databases & board state (never commit user data)
+*.db
+*.db-wal
+*.db-shm
+board.json
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log

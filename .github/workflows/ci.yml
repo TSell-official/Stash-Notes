@@ -1,0 +1,119 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Fast gate: core + CLI + MCP compile, lint, and test on all OSes.
+  # The desktop crate needs system webkit libs, so it is checked only on Linux
+  # (with deps installed) and built fully in the release job.
+  check:
+    name: Check & test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux Tauri deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libgtk-3-dev \
+            libayatana-appindicator3-dev librsvg2-dev patchage
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Formatting
+        run: cargo fmt --all --check
+
+      - name: Clippy (core, cli, mcp)
+        run: cargo clippy -p quicknotes-core -p quicknotes-cli -p quicknotes-mcp --all-targets -- -D warnings
+
+      - name: Clippy (desktop)
+        if: runner.os == 'Linux'
+        run: cargo clippy -p quicknotes-desktop --all-targets -- -D warnings
+
+      - name: Tests
+        run: cargo test -p quicknotes-core -p quicknotes-cli -p quicknotes-mcp
+
+      - name: Test desktop
+        if: runner.os == 'Linux'
+        run: cargo test -p quicknotes-desktop
+
+  frontend:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: npm ci
+        working-directory: frontend
+        run: npm ci
+      - name: Type-check + build
+        working-directory: frontend
+        run: npm run build
+
+  release:
+    name: Build binaries
+    needs: [check, frontend]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: quicknotes-linux
+          - os: windows-latest
+            artifact: quicknotes-windows
+          - os: macos-latest
+            artifact: quicknotes-macos
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux Tauri deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libssl-dev libgtk-3-dev \
+            libayatana-appindicator3-dev librsvg2-dev patchage
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Release build (CLI + MCP)
+        run: cargo build --release -p quicknotes-cli -p quicknotes-mcp
+
+      - name: Collect artifacts
+        shell: bash
+        run: |
+          mkdir -p out
+          cp target/release/quicknotes$( [ $RUNNER_OS = Windows ] && echo .exe ) out/ || true
+          cp target/release/quicknotes$( [ $RUNNER_OS = Windows ] && echo .exe ) out/quicknotes-cli$( [ $RUNNER_OS = Windows ] && echo .exe ) 2>/dev/null || true
+          cp target/release/quicknotes-mcp$( [ $RUNNER_OS = Windows ] && echo .exe ) out/ || true
+          ls out
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: out/

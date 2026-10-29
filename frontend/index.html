@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>QuickNotes • Sticky Board + Voice</title>
+  <style>
+    :root {
+      --bg: #0b0f14; --panel: #121821; --fg: #e6edf3; --muted: #96a2b2;
+      --accent: #47a3ff; --note: #fff8b3; --green: #c7ffd8; --pink: #ffd1dc; --blue: #d0e7ff;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      height: 100%; margin: 0; background: var(--bg); color: var(--fg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+    }
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+      background: linear-gradient(180deg, var(--panel), transparent);
+      display: flex; gap: .5rem; align-items: center; padding: .6rem .8rem;
+      backdrop-filter: saturate(120%) blur(6px); flex-wrap: wrap;
+    }
+    .brand { font-weight: 700; letter-spacing: .2px; }
+    .btn, .sel, .inp {
+      border: 1px solid #1f2a3a; background: var(--panel); color: var(--fg);
+      border-radius: 12px; padding: .6rem .8rem; font-weight: 600;
+    }
+    .btn { cursor: pointer; }
+    .btn:hover { border-color: var(--accent); }
+    .btn.primary { background: var(--accent); color: #001627; border-color: #1b6fb5; }
+    .sel, .inp { font-weight: 500; }
+    .inp { min-width: 220px; }
+    #search { flex: 1; max-width: 340px; }
+    .board { position: absolute; inset: 56px 0 0 0; overflow: hidden; }
+    .note {
+      position: absolute; min-width: 180px; min-height: 140px; max-width: 320px;
+      border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,.25);
+      padding: 44px .6rem .6rem .6rem; touch-action: none; display: flex; flex-direction: column;
+    }
+    .note .titlebar {
+      width: 100%; border: none; background: transparent; font: 800 13px/1.2 ui-sans-serif, system-ui;
+      color: #222; outline: none; padding: 0 0 2px; text-transform: uppercase; letter-spacing: .4px;
+    }
+    .note textarea {
+      flex: 1; width: 100%; min-height: 90px; border: none; background: transparent;
+      resize: none; color: #222; font: 600 15px/1.35 ui-sans-serif, system-ui; outline: none;
+    }
+    .toolbar {
+      position: absolute; top: 6px; left: 6px; right: 6px;
+      display: flex; gap: .4rem; justify-content: space-between; align-items: center;
+    }
+    .chip { display: flex; gap: .4rem; }
+    .mini {
+      border: none; border-radius: 10px; padding: .35rem .55rem; background: rgba(0,0,0,.15);
+      color: #111; font-weight: 800; cursor: pointer;
+    }
+    .mic { background: rgba(0,0,0,.2); color: #fff; }
+    .pin.active { background: #ffb703; }
+    .del { background: #ff6961; color: #111; }
+    .color {
+      width: 24px; height: 24px; border-radius: 6px; border: 2px solid rgba(0,0,0,.2); cursor: pointer;
+    }
+    .toast {
+      position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
+      background: #0a111b; border: 1px solid #1f2a3a; color: var(--fg);
+      padding: .6rem .8rem; border-radius: 12px; opacity: .95; z-index: 20;
+    }
+    .hidden { display: none !important; }
+    .support { margin-left: auto; color: var(--muted); font-size: .9rem; }
+    .empty {
+      position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
+      color: var(--muted); font-size: 1.05rem; text-align: center; line-height: 1.7;
+    }
+    kbd {
+      background: #1f2a3a; border-radius: 6px; padding: 2px 6px; font-family: ui-monospace, monospace;
+      font-size: .85em; color: var(--fg);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">QuickNotes</div>
+    <button id="add" class="btn primary">New Note</button>
+    <select id="color" class="sel" title="Default color">
+      <option value="#fff8b3">Yellow</option>
+      <option value="#c7ffd8">Green</option>
+      <option value="#ffd1dc">Pink</option>
+      <option value="#d0e7ff">Blue</option>
+    </select>
+    <input id="search" class="inp" type="search" placeholder="Search notes… (FTS5)" autocomplete="off" />
+    <button id="clearAll" class="btn">Clear All</button>
+    <span id="support" class="support"></span>
+  </header>
+
+  <div id="board" class="board" aria-live="polite">
+    <div id="empty" class="empty hidden">
+      <div>
+        No notes yet.<br />
+        Press <kbd>New Note</kbd>, double-tap the board,<br />
+        or hit <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd> anywhere in Windows.
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden">Saved</div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

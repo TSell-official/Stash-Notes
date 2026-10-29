@@ -1,0 +1,22 @@
+[package]
+name = "quicknotes-mcp"
+description = "Model Context Protocol (MCP) stdio server so AI agents (Claude Desktop, Cursor, Qwen Code, …) can read and write your QuickNotes database"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "quicknotes-mcp"
+path = "src/main.rs"
+
+[dependencies]
+quicknotes-core = { path = "../quicknotes-core", version = "0.1.0" }
+rust-mcp-sdk = { version = "2", default-features = false, features = ["server", "stdio", "macros"] }
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+async-trait.workspace = true
+rusqlite.workspace = true
+anyhow.workspace = true
