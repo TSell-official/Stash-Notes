@@ -1,0 +1,24 @@
+[workspace]
+members = [
+  "quicknotes-core",
+  "quicknotes-cli",
+  "quicknotes-mcp",
+  "quicknotes-desktop",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/TSell-official/quicknotes"
+authors = ["TSell-official"]
+
+[workspace.dependencies]
+rusqlite = { version = "0.32", features = ["bundled", "functions"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+tokio = { version = "1", features = ["full"] }
+clap = { version = "4", features = ["derive"] }
+async-trait = "0.1"

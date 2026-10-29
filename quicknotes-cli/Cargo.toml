@@ -1,0 +1,19 @@
+[package]
+name = "quicknotes-cli"
+description = "Global `quicknotes` command-line tool: create, search, list and delete notes from any terminal"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "quicknotes"
+path = "src/main.rs"
+
+[dependencies]
+quicknotes-core = { path = "../quicknotes-core", version = "0.1.0" }
+clap.workspace = true
+rusqlite.workspace = true
+anyhow.workspace = true
+serde_json.workspace = true
